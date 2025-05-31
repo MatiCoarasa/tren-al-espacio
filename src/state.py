@@ -3,7 +3,8 @@ import json
 import os
 import random
 import threading
-from constants import FPS, FIRE_DELAY, LEVEL_DURATION, WIDTH, HEIGHT, BG_SCROLL_SPEED, USE_DALLE_BG, USE_OPENAI_API, POWERUP_DROP_CHANCE, ASSETS, TIME_BETWEEN_SPAWNS
+import time
+from constants import FPS, FIRE_DELAY, LEVEL_DURATION, WIDTH, HEIGHT, BG_SCROLL_SPEED, USE_DALLE_BG, USE_OPENAI_API, POWERUP_DROP_CHANCE
 from models.player import Player
 from models.ufo import UFO
 from models.powerup import Powerup
@@ -20,7 +21,6 @@ class Game:
         self.state = Game.DIMENSION_SELECT if (USE_DALLE_BG or USE_OPENAI_API) else Game.PLAYING
         self.clock = pygame.time.Clock()
         self.bullets = pygame.sprite.Group()
-        self.ufo_bullets = pygame.sprite.Group()  # UFO bullets group
         self.enemies = pygame.sprite.Group()
         self.powerups = pygame.sprite.Group()  # Grupo para powerups
         self.player = Player()
@@ -99,10 +99,8 @@ class Game:
             "un bosque de cristal"
         ]
 
-        self.cursor_img = pygame.image.load(str(ASSETS / "projectiles" / "gun_sight" / "white_sight.png")).convert_alpha()
-
     def _spawn_enemy(self):
-        u = UFO(len(self.enemies) + 1)
+        u = UFO()
         self.enemies.add(u)
         self.all_sprites.add(u)
 
@@ -250,33 +248,30 @@ class Game:
             # Update scrolling background
             if self.scrolling_bg:
                 self.scrolling_bg.update(dt)
-            else:
-                self.screen.fill((15, 15, 40))
+                
             # Update level timer
             self.time_elapsed = now - self.level_start
             remaining_time = max(0, LEVEL_DURATION - self.time_elapsed)
+            
             # Check if level is over
             if remaining_time <= 0:
                 self.state = Game.HIGHSCORE
                 self.input_active = True
                 self.input_name = ""
                 return
+                
             # Game logic
             self.spawn_timer += dt
-            if self.spawn_timer > TIME_BETWEEN_SPAWNS / self.level:
+            if self.spawn_timer > 0.2:
                 self.spawn_timer = 0.0
                 self._spawn_enemy()
             key_state = pygame.key.get_pressed()
             # Pasar parámetros de powerups al actualizar el jugador
             self.player.update(key_state, pygame.mouse.get_pos(), dt, now, self.bullets,
-                               bullet_count=self.bullet_count,
-                               bullet_size=self.bullet_default_size,
-                               fire_delay=self.fire_delay)
+                           bullet_count=self.bullet_count,
+                           bullet_size=self.bullet_default_size,
+                           fire_delay=self.fire_delay)
             self.bullets.update()
-            self.ufo_bullets.update()
-            # UFOs shoot at player
-            for ufo in self.enemies:
-                ufo.update(self.player.rect.center, self.ufo_bullets)
             self.enemies.update()
             # Colisiones entre balas y enemigos
             hits = pygame.sprite.groupcollide(self.bullets, self.enemies, True, True)
@@ -286,21 +281,21 @@ class Game:
                         # Posibilidad de soltar powerup al derrotar un UFO
                         if random.random() < POWERUP_DROP_CHANCE:
                             self._spawn_powerup(ufo.rect.center)
+                            
                 kills = sum(len(v) for v in hits.values())
                 self._increase_progress(kills)
                 # Aplicar multiplicador de powerup y multiplicador de rango
                 self.score += int(10 * self.multiplier * self.score_multiplier * kills)
-            # UFO bullet hits player
-            if pygame.sprite.spritecollide(self.player, self.ufo_bullets, True):
-                if not self.is_invincible and not self.has_shield:
-                    self.state = Game.HIGHSCORE
+            
             # Actualizar powerups y verificar colisiones con jugador
             self.powerups.update()
             powerup_hits = pygame.sprite.spritecollide(self.player, self.powerups, True)
             for powerup in powerup_hits:
                 self._apply_powerup(powerup)
+                
             # Actualizar efectos de powerups activos
             self._update_active_powerups(dt)
+            
             # Decay progress bar each frame
             self._decay_progress(dt)
             
@@ -398,11 +393,6 @@ class Game:
         font_small = pygame.font.SysFont(None, 24)
         font_large = pygame.font.SysFont(None, 48)
         font_title = pygame.font.SysFont(None, 72)
-
-        # Draw custom cursor
-        mouse_pos = pygame.mouse.get_pos()
-        cursor_rect = self.cursor_img.get_rect(center=mouse_pos)
-        self.screen.blit(self.cursor_img, cursor_rect)
         
         if self.state == Game.LOADING:
             # Pantalla de carga
@@ -519,7 +509,6 @@ class Game:
             self.all_sprites.draw(self.screen)
             self.player.draw_trails(self.screen)
             self.bullets.draw(self.screen)
-            self.ufo_bullets.draw(self.screen)
             
             # Dibujar powerups (usando su método draw personalizado)
             for powerup in self.powerups:
