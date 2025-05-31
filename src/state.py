@@ -1,5 +1,5 @@
 import pygame
-from constants import FPS, FIRE_DELAY
+from constants import ASSETS, FPS, FIRE_DELAY, TIME_BETWEEN_SPAWNS
 from models.player import Player
 from models.ufo import UFO
 
@@ -19,9 +19,11 @@ class Game:
         self.score = 0
         self.level = 1
         self.fire_delay = FIRE_DELAY
+        self.cursor_img = pygame.image.load(str(ASSETS / "projectiles" / "gun_sight" / "white_sight.png")).convert_alpha()
+        pygame.mouse.set_visible(False)
 
     def _spawn_enemy(self):
-        u = UFO()
+        u = UFO(len(self.enemies) + 1)
         self.enemies.add(u)
         self.all_sprites.add(u)
 
@@ -39,7 +41,7 @@ class Game:
 
         if self.state == Game.PLAYING:
             self.spawn_timer += dt
-            if self.spawn_timer > 0.2:
+            if self.spawn_timer > TIME_BETWEEN_SPAWNS / self.level:
                 self.spawn_timer = 0.0
                 self._spawn_enemy()
             key_state = pygame.key.get_pressed()
@@ -57,3 +59,7 @@ class Game:
         font = pygame.font.SysFont(None, 20)
         txt = font.render(f"SCORE: {self.score} LVL: {self.level}", True, (255, 255, 255))
         self.screen.blit(txt, (10, 10))
+        # Draw custom cursor
+        mouse_pos = pygame.mouse.get_pos()
+        cursor_rect = self.cursor_img.get_rect(center=mouse_pos)
+        self.screen.blit(self.cursor_img, cursor_rect)
