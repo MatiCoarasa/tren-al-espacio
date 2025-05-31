@@ -3,8 +3,7 @@ import json
 import os
 import random
 import threading
-import time
-from constants import FPS, FIRE_DELAY, LEVEL_DURATION, WIDTH, HEIGHT, BG_SCROLL_SPEED, USE_DALLE_BG, USE_OPENAI_API, POWERUP_DROP_CHANCE
+from constants import FPS, FIRE_DELAY, LEVEL_DURATION, WIDTH, HEIGHT, BG_SCROLL_SPEED, USE_DALLE_BG, USE_OPENAI_API, POWERUP_DROP_CHANCE, ASSETS, TIME_BETWEEN_SPAWNS
 from models.player import Player
 from models.ufo import UFO
 from models.powerup import Powerup
@@ -99,8 +98,10 @@ class Game:
             "un bosque de cristal"
         ]
 
+        self.cursor_img = pygame.image.load(str(ASSETS / "projectiles" / "gun_sight" / "white_sight.png")).convert_alpha()
+
     def _spawn_enemy(self):
-        u = UFO()
+        u = UFO(len(self.enemies) + 1)
         self.enemies.add(u)
         self.all_sprites.add(u)
 
@@ -262,7 +263,7 @@ class Game:
                 
             # Game logic
             self.spawn_timer += dt
-            if self.spawn_timer > 0.2:
+            if self.spawn_timer > TIME_BETWEEN_SPAWNS / self.level:
                 self.spawn_timer = 0.0
                 self._spawn_enemy()
             key_state = pygame.key.get_pressed()
@@ -393,6 +394,11 @@ class Game:
         font_small = pygame.font.SysFont(None, 24)
         font_large = pygame.font.SysFont(None, 48)
         font_title = pygame.font.SysFont(None, 72)
+
+        # Draw custom cursor
+        mouse_pos = pygame.mouse.get_pos()
+        cursor_rect = self.cursor_img.get_rect(center=mouse_pos)
+        self.screen.blit(self.cursor_img, cursor_rect)
         
         if self.state == Game.LOADING:
             # Pantalla de carga

@@ -14,7 +14,7 @@ USE_DALLE_BG = 0  # 0: No utilizar DALL-E, 1: Generar fondos con DALL-E
 USE_OPENAI_API = 1  # 0: No usar OpenAI para powerups, 1: Generar powerups con OpenAI
 
 # Powerup constants
-POWERUP_DROP_CHANCE = 1.0  # Probabilidad de que un UFO deje un powerup (0-1)
+POWERUP_DROP_CHANCE = 0.8  # Probabilidad de que un UFO deje un powerup (0-1)
 POWERUP_MAX_LIFETIME = 8  # Segundos que permanece un powerup en pantalla
 
 # Player constants
@@ -31,5 +31,7 @@ MIN_SPAWN_HEIGHT = int(HEIGHT * 0.6)  # min spawn height for UFOs
 TIME_BETWEEN_SPAWNS = 1  # seconds between UFO spawns
 UFO_MIN_SPEED = 120  # base speed of UFOs in pixels per second
 UFO_MAX_SPEED = 240  # max speed of UFOs in pixels per second
+MIN_SIZE = 20  # min size of UFOs in pixels
+MAX_SIZE = 40  # max size of UFOs in pixels
 
-OA_API_KEY = "aa"
+OA_API_KEY = ""
