@@ -6,7 +6,7 @@ from constants import WIDTH, HEIGHT, FPS, ASSETS, MIN_SIZE, MAX_SIZE
 class UFO(pygame.sprite.Sprite):
 
     _cached_img = None  # Class variable to cache the image
-    
+
     def __init__(self, n):
         super().__init__()
         # Load sprite image
@@ -33,7 +33,6 @@ class UFO(pygame.sprite.Sprite):
         t = now - self.spawn_time
         # Speed oscillates with time
         self._update_movement(t)
-
         # Remove UFO if it goes off-screen
         if self.rect.left > WIDTH + 32:
             self.kill()
@@ -41,7 +40,7 @@ class UFO(pygame.sprite.Sprite):
     def _update_movement(self, t):
         x_speed = self.base_speed + self.base_speed * self.amp * math.sin(2 * math.pi * t)
         self.rect.x += x_speed
-        
+
         y_speed = 2 * math.cos(2 * math.pi * t)
         self.rect.y += y_speed
 
