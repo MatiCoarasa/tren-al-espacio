@@ -1,5 +1,5 @@
 import pygame
-from constants import FPS, LEVEL_TIME, FIRE_DELAY
+from constants import FPS, FIRE_DELAY
 from models.player import Player
 from models.ufo import UFO
 
@@ -48,9 +48,6 @@ class Game:
             self.enemies.update()
             for _ in pygame.sprite.groupcollide(self.bullets, self.enemies, True, True):
                 self.score += 10
-            if now - self.level_start >= LEVEL_TIME:
-                print(f"Level {self.level} completed! Score: {self.score}")
-                self.state = Game.SHOP
 
     def draw(self):
         self.screen.fill((15, 15, 40))

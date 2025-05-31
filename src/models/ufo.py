@@ -1,16 +1,36 @@
 import pygame
 import random
 import math
-from constants import WIDTH, FPS, MAX_SPAWN_HEIGHT, MIN_SPAWN_HEIGHT
+from constants import WIDTH, HEIGHT, FPS, ASSETS
 
 class UFO(pygame.sprite.Sprite):
     
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((32, 16))
-        self.image.fill((140, 180, 255))
-        y = random.randint(MAX_SPAWN_HEIGHT, MIN_SPAWN_HEIGHT)
-        self.rect = self.image.get_rect(midleft=(-32, y))
+        # Load sprite image
+        img_path = ASSETS / "enemies" / "blue_ufo" / "blue_ufo1.png"
+        if not hasattr(UFO, "_cached_img"):
+            try:
+                UFO._cached_img = pygame.image.load(str(img_path)).convert_alpha()
+            except pygame.error as e:
+                print(f"[WARN] Failed to load {img_path}: {e}. Generating placeholder PNG with Pillow.")
+                try:
+                    from PIL import Image, ImageDraw
+                    w, h = 64, 32
+                    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+                    draw = ImageDraw.Draw(img)
+                    draw.ellipse([(0, h//4), (w, h)], fill=(80, 160, 255, 255))
+                    draw.ellipse([(w*0.25, 0), (w*0.75, h*0.6)], fill=(120, 200, 255, 255))
+                    img.save(img_path)
+                    UFO._cached_img = pygame.image.load(str(img_path)).convert_alpha()
+                except Exception as ex:
+                    print(f"[ERROR] Could not generate sprite: {ex}. Using pygame rect.")
+                    fallback = pygame.Surface((32, 16))
+                    fallback.fill((140, 180, 255))
+                    UFO._cached_img = fallback
+        self.image = UFO._cached_img
+        y = random.randint(40, HEIGHT // 2)
+        self.rect = self.image.get_rect(midleft=(-self.image.get_width(), y))
         self.base_speed = random.uniform(60, 120) / FPS
         self.amp = random.uniform(20, 40) / FPS  # amplitude of speed oscillation
         self.spawn_time = pygame.time.get_ticks() / 1000.0  # seconds
