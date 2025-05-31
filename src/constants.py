@@ -18,6 +18,8 @@ TRAIL_SPACING = 30  # px spacing between dash ghosts
 # UFOs constants
 MAX_SPAWN_HEIGHT = 40  # max spawn height for UFOs
 MIN_SPAWN_HEIGHT = int(HEIGHT * 0.6)  # min spawn height for UFOs
-TIME_BETWEEN_SPAWNS = 1  # seconds between UFO spawns
+TIME_BETWEEN_SPAWNS = .8  # seconds between UFO spawns
 UFO_MIN_SPEED = 120  # base speed of UFOs in pixels per second
 UFO_MAX_SPEED = 240  # max speed of UFOs in pixels per second
+MIN_SIZE = 20  # min size of UFOs in pixels
+MAX_SIZE = 40  # max size of UFOs in pixels
