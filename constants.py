@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 # Setup constants
-ASSETS = Path(__file__).parent.parent / "assets"
+ASSETS = Path(__file__).parent / "assets"
 WIDTH, HEIGHT = 1280, 720
 FPS = 60
 LEVEL_DURATION = 60  # seconds per level
