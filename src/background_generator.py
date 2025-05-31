@@ -5,12 +5,12 @@ import json
 from pathlib import Path
 import pygame
 from openai import OpenAI
-from constants import WIDTH, HEIGHT, ASSETS
+from constants import WIDTH, HEIGHT, ASSETS, OA_API_KEY
 
 
 class BackgroundGenerator:
     def __init__(self):
-        self.api_key = "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"
+        self.api_key = OA_API_KEY
         self.client = None
         if self.api_key:
             self.client = OpenAI(api_key=self.api_key)

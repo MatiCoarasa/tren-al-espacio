@@ -2,7 +2,7 @@ import os
 import random
 import json
 from openai import OpenAI
-from constants import USE_OPENAI_API
+from constants import USE_OPENAI_API, OA_API_KEY
 
 class PowerupGenerator:
     """Genera powerups dinámicos basados en el prompt/dimensión del usuario"""
@@ -62,15 +62,8 @@ class PowerupGenerator:
         
         if USE_OPENAI_API:
             # Intentar obtener API key (primero de variables de entorno, luego hardcodeada)
-            self.api_key = "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"
-            
-            # Alternativamente, usar API key hardcodeada
-            if not self.api_key:
-                # Reemplazar esto con tu clave API
-                self.api_key = "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"
-                
-            if self.api_key and self.api_key != "tu-api-key-aqui":
-                self.client = OpenAI(api_key=self.api_key)
+            self.api_key = OA_API_KEY
+            self.client = OpenAI(api_key=self.api_key)
         
         self.dimension = ""
         self.custom_powerups = []
