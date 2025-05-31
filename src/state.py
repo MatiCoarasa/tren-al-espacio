@@ -39,20 +39,24 @@ class Game:
 
         if self.state == Game.PLAYING:
             self.spawn_timer += dt
-            if self.spawn_timer > 1.2:
+            if self.spawn_timer > 0.2:
                 self.spawn_timer = 0.0
                 self._spawn_enemy()
-            self.player.update(pygame.mouse.get_pos(), now, self.bullets)
+            key_state = pygame.key.get_pressed()
+            self.player.update(key_state, pygame.mouse.get_pos(), dt, now, self.bullets)
             self.bullets.update()
             self.enemies.update()
-            for bullet in pygame.sprite.groupcollide(self.bullets, self.enemies, True, True):
+            for _ in pygame.sprite.groupcollide(self.bullets, self.enemies, True, True):
                 self.score += 10
             if now - self.level_start >= LEVEL_TIME:
+                print(f"Level {self.level} completed! Score: {self.score}")
                 self.state = Game.SHOP
 
     def draw(self):
         self.screen.fill((15, 15, 40))
         self.all_sprites.draw(self.screen)
+        self.player.draw_trails(self.screen)
+        self.bullets.draw(self.screen)
         font = pygame.font.SysFont(None, 20)
-        txt = font.render(f"SCORE: {self.score}   LVL: {self.level}", True, (255,255,255))
+        txt = font.render(f"SCORE: {self.score} LVL: {self.level}", True, (255, 255, 255))
         self.screen.blit(txt, (10, 10))

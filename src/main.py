@@ -7,7 +7,7 @@ from state import Game
 async def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Train vs UFOs – Jam MVP")
+    pygame.display.set_caption("Train vs UFOs")
     game = Game(screen)
     game.level_start = pygame.time.get_ticks() / 1000.0
     running = True

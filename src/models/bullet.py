@@ -5,8 +5,8 @@ from constants import BULLET_SPEED, FPS, WIDTH, HEIGHT
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, pos, angle):
         super().__init__()
-        self.image = pygame.Surface((4, 8))
-        self.image.fill((255, 220, 90))
+        self.image = pygame.Surface((10, 10))
+        self.image.fill((255, 255, 255))
         self.rect = self.image.get_rect(center=pos)
         self.vx = math.cos(angle) * BULLET_SPEED / FPS
         self.vy = math.sin(angle) * BULLET_SPEED / FPS
