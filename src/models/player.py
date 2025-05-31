@@ -24,7 +24,7 @@ class Player(pygame.sprite.Sprite):
         img.blit(turret_rot, tr)
         return img
 
-    def update(self, key_state, mouse_pos, dt, current_time, bullets):
+    def update(self, key_state, mouse_pos, dt, current_time, bullets, bullet_count=1, bullet_size=10, fire_delay=FIRE_DELAY):
         # Horizontal movement via keyboard
         move_dir = 0
         if key_state[pygame.K_a] or key_state[pygame.K_LEFT]:
@@ -62,10 +62,34 @@ class Player(pygame.sprite.Sprite):
         angle = math.atan2(dy, dx)
         angle_deg = math.degrees(angle)
         self.image = self._compose_image(angle_deg)
-        if current_time - self.last_shot >= FIRE_DELAY:
+        
+        # Disparar balas según el fire_delay proporcionado (puede ser modificado por powerups)
+        if current_time - self.last_shot >= fire_delay:
             self.last_shot = current_time
-            bullet = Bullet(self.rect.center, angle)
-            bullets.add(bullet)
+            
+            # Disparo múltiple basado en bullet_count (powerup)
+            if bullet_count == 1:
+                # Disparo normal
+                bullet = Bullet(self.rect.center, angle, bullet_size)
+                bullets.add(bullet)
+            elif bullet_count == 3:
+                # Triple disparo (uno recto, dos laterales)
+                angle_spread = 15  # grados de separación
+                bullet_center = Bullet(self.rect.center, angle, bullet_size)
+                bullet_left = Bullet(self.rect.center, angle + math.radians(angle_spread), bullet_size)
+                bullet_right = Bullet(self.rect.center, angle - math.radians(angle_spread), bullet_size)
+                bullets.add(bullet_center, bullet_left, bullet_right)
+            else:
+                # Cualquier otro número de disparos en abanico
+                if bullet_count > 1:
+                    angle_spread_total = 30  # ángulo total del abanico
+                    for i in range(bullet_count):
+                        if bullet_count > 1:
+                            current_angle = angle - math.radians(angle_spread_total/2) + math.radians(angle_spread_total * i / (bullet_count-1))
+                        else:
+                            current_angle = angle
+                        bullet = Bullet(self.rect.center, current_angle, bullet_size)
+                        bullets.add(bullet)
 
         # fade trails with individual rates
         for t in self.trails[:]:
