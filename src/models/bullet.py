@@ -3,10 +3,11 @@ import math
 from constants import BULLET_SPEED, FPS, WIDTH, HEIGHT
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, pos, angle, size=10):
+    
+    def __init__(self, pos, angle, size=10, color=(255, 255, 255)):
         super().__init__()
         self.image = pygame.Surface((size, size))
-        self.image.fill((255, 255, 255))
+        self.image.fill(color)
         # Agregar un brillo central para que se vea mejor
         if size > 5:
             inner_size = max(4, int(size * 0.6))

@@ -1,12 +1,16 @@
 import os
 import time
-import requests
 import json
 from pathlib import Path
 import pygame
 from openai import OpenAI
 from constants import WIDTH, HEIGHT, ASSETS
 
+# Use pygbag.net for browser-compatible requests
+try:
+    import pygbag.net as net
+except ImportError:
+    net = None
 
 class BackgroundGenerator:
     def __init__(self):
@@ -60,12 +64,23 @@ class BackgroundGenerator:
             image_url = response.data[0].url
             
             # Download the image
-            image_response = requests.get(image_url)
-            if image_response.status_code == 200:
-                # Save image to file
+            if net:
+                # Use pygbag.net for browser
+                image_response = net.get(image_url)
+                if hasattr(image_response, 'content'):
+                    content = image_response.content
+                else:
+                    content = image_response.read()
+                status_code = getattr(image_response, 'status_code', 200)
+            else:
+                import requests
+                image_response = requests.get(image_url)
+                content = image_response.content
+                status_code = image_response.status_code
+            if status_code == 200:
                 with open(file_path, 'wb') as f:
-                    f.write(image_response.content)
-                    
+                    f.write(content)
+                
                 # Save prompt to metadata file for future reference
                 metadata_path = file_path.with_suffix('.json')
                 with open(metadata_path, 'w') as f:
@@ -74,7 +89,7 @@ class BackgroundGenerator:
                 print(f"Background generated and saved to {file_path}")
                 return file_path
             else:
-                print(f"Failed to download image: {image_response.status_code}")
+                print(f"Failed to download image: {status_code}")
                 return None
                 
         except Exception as e:

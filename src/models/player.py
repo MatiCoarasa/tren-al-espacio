@@ -1,15 +1,20 @@
 import pygame
 import math
 from models.bullet import Bullet
-from constants import FPS, FIRE_DELAY, WIDTH, PLAYER_SPEED, DASH_DISTANCE, DASH_COOLDOWN, TRAIL_SPACING, HEIGHT
+from constants import FPS, FIRE_DELAY, WIDTH, PLAYER_SPEED, DASH_DISTANCE, DASH_COOLDOWN, TRAIL_SPACING, HEIGHT, ASSETS
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.base_img = pygame.Surface((64, 20))
-        self.base_img.fill((200, 60, 40))
-        self.turret_img = pygame.Surface((18, 18), pygame.SRCALPHA)
-        pygame.draw.circle(self.turret_img, (90, 200, 90), (9, 9), 9)
+        # Cargar imagen del tren desde assets
+        self.base_img = pygame.image.load(str(ASSETS / "character" / "red_train.png")).convert_alpha()
+        # Escalar el tren si es necesario
+        self.base_img = pygame.transform.scale(self.base_img, (80, 40))  # Ajustar tamaño según necesidades
+        
+        # Cargar imagen del cañón
+        self.turret_img = pygame.image.load(str(ASSETS / "character" / "red_cannon.png")).convert_alpha()
+        self.turret_img = pygame.transform.scale(self.turret_img, (30, 30))  # Ajustar tamaño según necesidades
+        
         self.image = self._compose_image(0)
         self.rect = self.image.get_rect(midbottom=(WIDTH//6, HEIGHT-30))
         self.last_shot = 0.0
@@ -17,11 +22,26 @@ class Player(pygame.sprite.Sprite):
         self.trails = []  # list of dicts {image, rect, alpha}
 
     def _compose_image(self, angle_deg):
+        # Rotar el cañón según el ángulo del mouse
         turret_rot = pygame.transform.rotate(self.turret_img, -angle_deg)
-        img = self.base_img.copy()
-        tr = turret_rot.get_rect(center=(self.base_img.get_width()//2,
-                                         self.base_img.get_height()//2))
-        img.blit(turret_rot, tr)
+        
+        # Calcular el tamaño necesario para la imagen compuesta
+        # Crear una superficie más grande para contener tren + cañón
+        # Añadir espacio suficiente para que el cañón sea visible completamente
+        new_width = max(self.base_img.get_width(), turret_rot.get_width())
+        new_height = self.base_img.get_height() + turret_rot.get_height() - 20  # Espacio adicional
+        
+        # Crear superficie con transparencia
+        img = pygame.Surface((new_width, new_height), pygame.SRCALPHA)
+        
+        # Posicionar el tren en la parte inferior de la nueva superficie
+        train_pos = (new_width//2 - self.base_img.get_width()//2, new_height - self.base_img.get_height())
+        img.blit(self.base_img, train_pos)
+        
+        # Posicionar el cañón por encima del tren
+        cannon_pos = (new_width//2 - turret_rot.get_width()//2, 0)
+        img.blit(turret_rot, cannon_pos)
+        
         return img
 
     def update(self, key_state, mouse_pos, dt, current_time, bullets, bullet_count=1, bullet_size=10, fire_delay=FIRE_DELAY):
@@ -47,9 +67,9 @@ class Player(pygame.sprite.Sprite):
                 trail_img.set_alpha(180)
                 trail_rect = trail_img.get_rect(center=(ghost_x, self.rect.centery))
                 # fade rate proportional to distance: farther ghosts fade faster
-                factor = (steps - i + 1) / steps  # 1 for farthest, down to ~0 for closest
+                factor = (steps - i + 8) / steps  # 1 for farthest, down to ~0 for closest
                 self.trails.append({'image': trail_img, 'rect': trail_rect, 'alpha': 180,
-                                     'fade_rate': 600 * factor})
+                                     'fade_rate': 1000 * factor})
             self.last_dash = current_time
         # clamp inside screen (after movement and potential dash)
         if self.rect.left < 0:
@@ -63,7 +83,7 @@ class Player(pygame.sprite.Sprite):
         angle_deg = math.degrees(angle)
         self.image = self._compose_image(angle_deg)
         
-        # Disparar balas según el fire_delay proporcionado (puede ser modificado por powerups)
+
         if current_time - self.last_shot >= fire_delay:
             self.last_shot = current_time
             
