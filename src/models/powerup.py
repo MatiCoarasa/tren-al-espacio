@@ -1,7 +1,7 @@
 import pygame
 import math
 import random
-from constants import WIDTH, HEIGHT, FPS
+from constants import HEIGHT, FPS
 
 class Powerup(pygame.sprite.Sprite):
     """Clase que representa un powerup que cae y puede ser recogido por el jugador"""
